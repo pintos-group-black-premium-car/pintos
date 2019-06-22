@@ -2,7 +2,7 @@ About the project:
 
 Pintos is a homework for cs318 operating system.
 
-++++++++++++++++++++++++++++++++++++++++++++++++++
+---
 
 Project1:
 
