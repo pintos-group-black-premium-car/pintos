@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/alarm.h"
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -24,6 +25,11 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
+
+/* NICE_VALUE */
+#define NICE_MAX 20
+#define NICE_DEFAULT 0
+#define NICE_MIN -20
 
 /* A kernel thread or user process.
 
@@ -95,7 +101,15 @@ struct thread
     struct list_elem elem;              /* List element. */
 
     //
-    struct alarm* alrm;                 /* Alarm for project1. */
+    struct alarm alrm;                  /* Alarm. */
+
+    int base_priority;                  /* basic priority without donate. */
+    bool donated;                       /* whether the priority is donated. */
+    struct list locks;                  /* locks the thread hold on other threads. */
+    struct lock *blocked;               /* the lock locking the thread. */
+
+    int nice;                           /* nice value of the thread. */
+    int recent_cpu;                     /* recent cpu usage. */
     //
 
 #ifdef USERPROG

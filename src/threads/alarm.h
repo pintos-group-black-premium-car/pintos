@@ -7,6 +7,7 @@ struct alarm{
     struct thread* thrd;
     struct list_elem elem;
     int64_t ticks;
+    unsigned magic;
 };
 
 void alarm_init (void);

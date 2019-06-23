@@ -14,4 +14,8 @@ Project1:
   - interrupt disabled when alarm added to the list, enabled when operation completed.
   - interrupt disabled when dismissing the alarm, enabled when operation completed.
 2. priority scheduling
-* intro :
+* intro : complete the priority scheduling of threads.
+* files changed : thread.h, thread.c,  synch.c, init.c.
+* question : 
+  - what's the effect of MAGIC, when to init it.
+  - why using NICE, difference to priority.

@@ -451,7 +451,9 @@ is_thread (struct thread *t)
 static void
 init_thread (struct thread *t, const char *name, int priority)
 {
+  /* previous code
   enum intr_level old_level;
+  */
 
   ASSERT (t != NULL);
   ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
@@ -461,12 +463,32 @@ init_thread (struct thread *t, const char *name, int priority)
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
+  /* previous code
   t->priority = priority;
   t->magic = THREAD_MAGIC;
 
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
   intr_set_level (old_level);
+  */
+  //
+  if (!thread_mlfqs){
+    t->priority = priority;
+    t->base_priority = t->priority;
+    t->donated = false;
+  } else{
+    t->nice = NICE_DEFAULT;
+    if (t == initial_thread){
+      t->recent_cpu = 0;
+    } else{
+      t->recent_cpu = thread_get_recent_cpu ();
+    }
+  }
+  list_init (&t->locks);
+  t->blocked = NULL;
+  t->magic = THREAD_MAGIC;
+  list_push_back (&all_list, &t->allelem);
+  //
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

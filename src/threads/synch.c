@@ -179,6 +179,9 @@ lock_init (struct lock *lock)
 
   lock->holder = NULL;
   sema_init (&lock->semaphore, 1);
+  //
+  lock->lock_priority = PRI_MIN - 1;
+  //
 }
 
 /* Acquires LOCK, sleeping until it becomes available if

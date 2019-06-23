@@ -4,8 +4,13 @@
 #include "threads/thread.h"
 #include "threads/interrupt.h"
 
+#define ALARM_MAGIC 0x67452301  /* ALARM_MAGIC */
+
 static struct list alarm_list;
 static int64_t cur_ticks;
+
+static void alarm_dismiss (struct alarm *);
+static bool is_alarm (struct alarm *);
 
 void alarm_init (void){
     list_init (&alarm_list);
@@ -17,7 +22,7 @@ void alarm_set (int64_t ticks){
     struct thread* thrd = thread_current();
     ASSERT(thrd->status == THREAD_RUNNING);
     if (ticks == 0) return;
-    struct alarm* alrm = thrd->alrm;
+    struct alarm* alrm = &thrd->alrm;
     alrm->thrd = thrd;
     alrm->ticks = ticks + timer_ticks ();
 
@@ -48,4 +53,9 @@ static void alarm_dismiss (struct alarm *alrm){
     list_remove (&alrm->elem);
     thread_unblock (&alrm->elem);
     intr_set_level (pre_level);
+}
+
+/* check whether is an alarm. */
+static bool is_alarm (struct alarm *alrm){
+    return (alrm != NULL && alrm -> magic == ALARM_MAGIC);
 }
