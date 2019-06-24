@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include <list.h>
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -302,6 +303,7 @@ void
 thread_yield (void) 
 {
   struct thread *cur = thread_current ();
+  /* previous code
   enum intr_level old_level;
   
   ASSERT (!intr_context ());
@@ -310,6 +312,20 @@ thread_yield (void)
   if (cur != idle_thread) 
     list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
+  schedule ();
+  intr_set_level (old_level);
+  */
+  thread_yield_head (cur);
+}
+
+//
+void thread_yield_head (struct thread *cur_thread){
+  enum intr_level old_level;
+  ASSERT (!intr_context ());
+  old_level = intr_disable ();
+  if (cur_thread != idle_thread)
+    list_insert_ordered (&ready_list, &cur_thread->elem, thread_insert_less_head, NULL);
+  cur_thread->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
 }
@@ -335,8 +351,36 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
+  /* previous code
   thread_current ()->priority = new_priority;
+  */
+  //
+  thread_set_priority_other (thread_current (), new_priority, true);
 }
+
+//
+/* reimplement function thread_set_priority. */
+void thread_set_priority_other (struct thread *cur_thread, int new_priority, bool forced){
+  if (!cur_thread->donated){
+    cur_thread->priority = new_priority;
+    cur_thread->base_priority = new_priority;
+  } else if (forced){
+    if (cur_thread->priority > new_priority){
+      cur_thread->base_priority = new_priority;
+    } else{
+      cur_thread->priority = new_priority;
+    }
+  } else{
+    cur_thread->priority = new_priority;
+  }
+  if (cur_thread->status == THREAD_READY){
+    list_remove (&cur_thread->elem);
+    list_insert_ordered (&ready_list, &cur_thread->elem, thread_insert_less_tail, NULL);
+  } else if (cur_thread->status == THREAD_RUNNING && list_entry (list_begin (&ready_list), struct thread, elem)->priority > new_priority){
+    thread_yield ();
+  }
+}
+//
 
 /* Returns the current thread's priority. */
 int
@@ -600,6 +644,33 @@ allocate_tid (void)
 
   return tid;
 }
+
+//
+void sort_thread_list (struct list *l){
+  if (list_empty (l)) return;
+  list_sort (l, thread_sort_less, NULL);
+}
+
+static bool thread_sort_less (const struct list_elem *lhs, const struct list_elem *rhs, void *aux UNUSED){
+  struct thread *a, *b;
+  ASSERT (lhs != NULL && rhs != NULL);
+  a = list_entry (lhs, struct thread, elem);
+  b = list_entry (rhs, struct thread, elem);
+  return (a->priority > b->priority);
+}
+
+static bool thread_insert_less_head (const struct list_elem *lhs, const struct list_elem *rhs, void *aux UNUSED){
+  struct thread *a, *b;
+  ASSERT (lhs != NULL && rhs != NULL);
+  a = list_entry (lhs, struct thread, elem);
+  b = list_entry (rhs, struct thread, elem);
+  return (a->priority >= b->priority);
+}
+
+static bool thread_insert_less_tail (const struct list_elem *lhs, const struct list_elem *rhs, void *aux UNUSED){
+  return thread_sort_less (lhs, rhs, NULL);
+}
+//
 
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
