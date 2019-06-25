@@ -161,6 +161,13 @@ int thread_get_load_avg (void);
 void sort_thread_list (struct list *l);
 void thread_set_priority_other (struct thread *cur_thread, int new_priority, bool forced);
 void thread_yield_head (struct thread *cur_thread);
+
+void thread_calc_load_avg (void);
+void thread_calc_recent_cpu (void);
+void thread_calc_priority (void);
+void thread_calc_recent_cpu_for_all (void);
+void thread_calc_priority_for_all (void);
+struct thread *get_thread_by_tid (tid_t);
 //
 
 #endif /* threads/thread.h */

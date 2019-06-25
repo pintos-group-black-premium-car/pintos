@@ -13,7 +13,8 @@ Project1:
 * about interrupt :
   - interrupt disabled when alarm added to the list, enabled when operation completed.
   - interrupt disabled when dismissing the alarm, enabled when operation completed.
-2. priority scheduling
+  - interrupt disabled when acquiring a lock , and enabled when operation completed.
+1. priority scheduling
 * intro : complete the priority scheduling of threads.
 * files changed : thread.h, thread.c,  synch.c, init.c.
 * question : 
