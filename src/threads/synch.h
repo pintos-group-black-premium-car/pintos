@@ -9,6 +9,10 @@ struct semaphore
   {
     unsigned value;             /* Current value. */
     struct list waiters;        /* List of waiting threads. */
+
+    // My implement.
+    int priority;
+    //
   };
 
 void sema_init (struct semaphore *, unsigned value);
@@ -22,10 +26,11 @@ struct lock
   {
     struct thread *holder;      /* Thread holding lock (for debugging). */
     struct semaphore semaphore; /* Binary semaphore controlling access. */
-    //
-    int lock_priority;                  /* priority of the lock. */
-    struct list_elem holder_elem;       /* elem of the lock_list in struct thread. */
-    //
+
+    // My implement.
+    struct list_elem lockelem;
+    int priority;
+    // 
   };
 
 void lock_init (struct lock *);
@@ -38,9 +43,6 @@ bool lock_held_by_current_thread (const struct lock *);
 struct condition 
   {
     struct list waiters;        /* List of waiting threads. */
-    //
-    struct thread *holder;      /* Thread holding the cond. */
-    //
   };
 
 void cond_init (struct condition *);

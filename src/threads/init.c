@@ -88,10 +88,6 @@ pintos_init (void)
   /* Initialize ourselves as a thread so we can use locks,
      then enable console locking. */
   thread_init ();
-
-  //
-  alarm_init ();
-  //
   console_init ();  
 
   /* Greet user. */

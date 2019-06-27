@@ -4,8 +4,6 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
-#include "threads/alarm.h"
-#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -25,11 +23,6 @@ typedef int tid_t;
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
-
-/* NICE_VALUE */
-#define NICE_MAX 20
-#define NICE_DEFAULT 0
-#define NICE_MIN -20
 
 /* A kernel thread or user process.
 
@@ -100,16 +93,12 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
-    //
-    struct alarm alrm;                  /* Alarm. */
-
-    int base_priority;                  /* basic priority without donate. */
-    bool donated;                       /* whether the priority is donated. */
-    struct list locks;                  /* locks the thread hold on other threads. */
-    struct lock *blocked;               /* the lock locking the thread. */
-
-    int nice;                           /* nice value of the thread. */
-    int recent_cpu;                     /* recent cpu usage. */
+    // My implement.
+    int original_priority;
+    struct list_elem waitelem;
+    int64_t sleep_endtick;
+    struct lock *waiting_lock;
+    struct list locks;
     //
 
 #ifdef USERPROG
@@ -129,7 +118,7 @@ extern bool thread_mlfqs;
 void thread_init (void);
 void thread_start (void);
 
-void thread_tick (void);
+void thread_tick (int64_t tick);
 void thread_print_stats (void);
 
 typedef void thread_func (void *aux);
@@ -157,17 +146,9 @@ void thread_set_nice (int);
 int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
-//
-void sort_thread_list (struct list *l);
-void thread_set_priority_other (struct thread *cur_thread, int new_priority, bool forced);
-void thread_yield_head (struct thread *cur_thread);
-
-void thread_calc_load_avg (void);
-void thread_calc_recent_cpu (void);
-void thread_calc_priority (void);
-void thread_calc_recent_cpu_for_all (void);
-void thread_calc_priority_for_all (void);
-struct thread *get_thread_by_tid (tid_t);
+// My implement.
+void thread_sleep_until (int64_t wake_tick);
+void thread_priority_donate (struct thread *, int priority);
 //
 
 #endif /* threads/thread.h */
