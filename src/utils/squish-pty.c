@@ -312,8 +312,8 @@ main (int argc __attribute__ ((unused)), char *argv[])
      by the process that ran us.  It really should be applied to
      our child process. */
   memset (&zero_itimerval, 0, sizeof zero_itimerval);
-  if (setitimer (ITIMER_VIRTUAL, &zero_itimerval, &old_itimerval) < 0)
-    fail_io ("setitimer");
+  /*if (setitimer (ITIMER_VIRTUAL, &zero_itimerval, &old_itimerval) < 0)
+    fail_io ("setitimer");*/
   
   pid = fork ();
   if (pid < 0)
@@ -353,8 +353,8 @@ main (int argc __attribute__ ((unused)), char *argv[])
         old_itimerval.it_interval.tv_usec = 999999;
       }
       /* Running in child process. */
-      if (setitimer (ITIMER_VIRTUAL, &old_itimerval, NULL) < 0)
-        fail_io ("setitimer-child");
+      /*if (setitimer (ITIMER_VIRTUAL, &old_itimerval, NULL) < 0)
+        fail_io ("setitimer-child");*/
       if (dup2 (slave, STDOUT_FILENO) < 0)
         fail_io ("dup2");
       if (close (pipe_fds[0]) < 0 || close (pipe_fds[1]) < 0
